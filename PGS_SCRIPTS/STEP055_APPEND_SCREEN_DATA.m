@@ -173,10 +173,10 @@ GNO.oe_lof(ai)  = LOFMET.oe_lof(bi(ai));
 GNO.pLI(ai)     = LOFMET.pLI(bi(ai));
 
 
-GNO = movevars(GNO,{'obs_lof','exp_lof','oe_lof'},'After','HW_fRA');
-GNO = movevars(GNO,{'obs_mis','exp_mis','oe_mis'},'After','HW_fRA');
-GNO = movevars(GNO,{'obs_syn','exp_syn','oe_syn'},'After','HW_fRA');
-GNO = movevars(GNO,{'pLI'},'After','HW_fRA');
+GNO = movevars(GNO,{'obs_lof','exp_lof','oe_lof'},'After','isSV');
+GNO = movevars(GNO,{'obs_mis','exp_mis','oe_mis'},'After','isSV');
+GNO = movevars(GNO,{'obs_syn','exp_syn','oe_syn'},'After','isSV');
+GNO = movevars(GNO,{'pLI'},'After','isSV');
 
 
 GNOMAD = GNO;
@@ -187,12 +187,12 @@ GNOMAD = GENEijk(GNOMAD);
 
 
 
-% GNOMAD COLUMNS   1-111
-% PLI    COLUMNS 112-121
-% DAWES  COLUMNS 122-183
-% MKO1   COLUMNS 184-216
-% MKO2   COLUMNS 217-277
-% SCR    COLUMNS 278-280
+% GNOMAD COLUMNS   1-114
+% PLI    COLUMNS 115-124
+% DAWES  COLUMNS 125-186
+% MKO1   COLUMNS 187-219
+% MKO2   COLUMNS 220-280
+% SCR    COLUMNS 281-283
 %==========================================================================
 %% CREATE MK2 TARGET COLUMN
 %==========================================================================

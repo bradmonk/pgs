@@ -41,12 +41,12 @@ MK2     = PGS.MK2;      % MOUSE KO DATASET SET-2
 peek(GNOMAD)
 
 
-% GNOMAD COLUMNS   1-111
-% PLI    COLUMNS 112-121
-% DAWES  COLUMNS 122-183
-% MK1    COLUMNS 184-216
-% MK2    COLUMNS 217-277
-% SCR    COLUMNS 278-280
+% GNOMAD COLUMNS   1-114
+% PLI    COLUMNS 115-124
+% DAWES  COLUMNS 125-186
+% MKO1   COLUMNS 187-219
+% MKO2   COLUMNS 220-280
+% SCR    COLUMNS 281-283
 %==========================================================================
 %% IMPORT MOUSE KNOCKOUT DATA
 %==========================================================================
@@ -78,17 +78,21 @@ TBL4 = convertvars(TBL4,@iscell,'string');
 %==========================================================================
 clc; clearvars -except P GNOMAD DAW MK1 MK2 GUO TBL1 TBL2 TBL3 TBL4
 %----------------------------------------
-% GNOMAD COLUMNS   1-111
-% PLI    COLUMNS 112-121
-% DAWES  COLUMNS 122-183
-% MK1    COLUMNS 184-216
-% MK2    COLUMNS 217-277
-% SCR    COLUMNS 278-280
+% GNOMAD COLUMNS   1-114
+% PLI    COLUMNS 115-124
+% DAWES  COLUMNS 125-186
+% MKO1   COLUMNS 187-219
+% MKO2   COLUMNS 220-280
+% SCR    COLUMNS 281-283
 % 
-% ROW 3768 IS A GOOD PLACE TO LOOK AT DAWES DATA (MUTYH & TOE1 GENES)
-% CHR==1, POS==45799121
+% A GOOD PLACE TO LOOK AT DAWES DATA IS AT MUTYH & TOE1 GENES
+% 
+%   GTAB_MUTYH = GNOMAD(GNOMAD.GENE == "MUTYH",:);
+%   GTAB_TOE1  = GNOMAD(GNOMAD.GENE == "TOE1",:);
+% 
 %----------------------------------------
 peek(GNOMAD)
+
 
 
 GNO = GNOMAD;
@@ -131,17 +135,9 @@ GNOMAD = GNO;
 %% FLAG TARGET GENES
 %==========================================================================
 clc; clearvars -except P GNOMAD DAW MK1 MK2 GUO TBL1 TBL2 TBL3 TBL4
-%----------------------------------------
-% GNOMAD COLUMNS   1-111
-% PLI    COLUMNS 112-121
-% DAWES  COLUMNS 122-183
-% MK1    COLUMNS 184-216
-% MK2    COLUMNS 217-277
-% SCR    COLUMNS 278-280
-% 
-% ROW 3768 IS A GOOD PLACE TO LOOK AT DAWES DATA (MUTYH & TOE1 GENES)
-% CHR==1, POS==45799121
-%----------------------------------------
+
+
+
 peek(GNOMAD)
 
 
@@ -262,9 +258,10 @@ GNO.MOUSE2_GENES = [];
 
 GNOMAD = GNO;
 
-
-
 peek(GNOMAD)
+
+
+
 
 
 %==========================================================================

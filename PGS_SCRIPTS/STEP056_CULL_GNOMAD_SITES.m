@@ -31,18 +31,26 @@ clc; clearvars -except P
 
 PGS = load([P.mat P.f 'PGS_STEP055_B_OUTPUT.mat']);
 
-GNOMAD  = PGS.GNOMAD;   % GNOMAD DATASET
+GNOMAD  = PGS.GNOMAD;
+
+
+
+% GNOMAD DATASET COLUMN REFERENCE
+%------------------------------------------------------------
+% GNOMAD COLUMNS    T.GENEi            -    T.isSV
+% PLI    COLUMNS    T.pLI              -    T.oe_lof
+% DAWES  COLUMNS    T.hgnc_id          -    T.isdawes
+% MK1    COLUMNS    T.MKO1_TARGETS     -    T.placenta
+% MK2    COLUMNS    T.HOMOLO_GENE_ID   -    T.MKO2_TARGETS
+% SCR    COLUMNS    T.INVITAE          -    T.MYRIAD
+% TARG   COLUMNS    T.HAS_OMIM         -    T.MOUSE2_TARGETS
+%------------------------------------------------------------
 
 
 
 
-% GNOMAD COLUMNS   1-111
-% PLI    COLUMNS 112-121
-% DAWES  COLUMNS 122-183
-% MK1    COLUMNS 184-216
-% MK2    COLUMNS 217-276
-% SCR    COLUMNS 277-279
-% TARG   COLUMNS 280-286
+
+
 %==========================================================================
 %% REMOVE SITES WITH FEW SEQUENCED ALLELES (AN)
 %==========================================================================
@@ -50,9 +58,20 @@ clc; clearvars -except P PGS GNOMAD
 
 
 
-N = round(quantile(GNOMAD.AN,.01));
+GNO = GNOMAD;
 
-GNOMAD( GNOMAD.AN < N , :) = [];
+close all; histogram(GNO.AN)
+
+N = round(quantile(GNO.AN,.005));
+
+GNO( GNO.AN < N , :) = [];
+
+
+
+close all; histogram(GNO.AN)
+
+
+GNOMAD = GNO;
 
 
 
@@ -66,7 +85,11 @@ clc; clearvars -except P PGS GNOMAD
 
 
 
+unique(GNOMAD.CHR)
+
+
 GNOMAD(GNOMAD.CHR == 23 , :) = [];
+GNOMAD(GNOMAD.CHR == 25 , :) = [];
 
 
 
@@ -85,6 +108,8 @@ clc; clearvars -except P PGS GNOMAD
 
 
 
+close all; histogram(GNOMAD.AF(GNOMAD.isSV==1 & GNOMAD.AF>.05),.05:.01:1);
+hold on;   histogram(GNOMAD.AF(GNOMAD.isLOF==1 & GNOMAD.AF>.05),.05:.01:1);
 
 GNOMAD(GNOMAD.AF > .50 , :) = [];
 
@@ -102,9 +127,21 @@ clc; clearvars -except P PGS GNOMAD
 
 
 
-N = .05;
 
-i = (GNOMAD.NHOMALT ./ GNOMAD.AC) > N;
+
+NHOMALT_PCT = (GNOMAD.NHOMALT ./ GNOMAD.AC);
+
+
+close all; histogram( NHOMALT_PCT(GNOMAD.isSV==1  ) , 0:.01:.5);
+hold on;   histogram( NHOMALT_PCT(GNOMAD.isLOF==1 ) , 0:.01:.5);
+
+close all; histogram( NHOMALT_PCT(GNOMAD.isSV==1 & NHOMALT_PCT>.01  ) , 0:.01:.5);
+hold on;   histogram( NHOMALT_PCT(GNOMAD.isLOF==1 & NHOMALT_PCT>.01 ) , 0:.01:.5);
+
+
+
+
+i = NHOMALT_PCT > .1;
 
 GNOMAD(i , :) = [];
 
@@ -121,21 +158,26 @@ Nreport(GNOMAD)
 clc; clearvars -except P PGS GNOMAD
 
 
+STR = GNOMAD(GNOMAD.isSV==1,:);
+LOF = GNOMAD(GNOMAD.isLOF==1,:);
 
 
+gcounts( STR.inSegDup )
+gcounts( STR.inLowComplex )
+gcounts( STR.inDecoy )
+gcounts( STR.lof_flags ~= "NaN" )
 
-gcounts( GNOMAD.inSegDup )
-gcounts( GNOMAD.inLowComplex )
-gcounts( GNOMAD.inDecoy )
-gcounts( GNOMAD.lof_flags ~= "NaN" )
-
+gcounts( LOF.inSegDup )
+gcounts( LOF.inLowComplex )
+gcounts( LOF.inDecoy )
+gcounts( LOF.lof_flags ~= "NaN" )
 
 
 
 GNOMAD(GNOMAD.inSegDup == 1 , :)        = [];
 GNOMAD(GNOMAD.inLowComplex == 1 , :)    = [];
 GNOMAD(GNOMAD.inDecoy == 1 , :)         = [];
-GNOMAD(GNOMAD.lof_flags ~= "NaN" , :)   = [];
+GNOMAD(GNOMAD.lof_flags ~= "NaN" & GNOMAD.isLOF==1, :)   = [];
 
 
 
@@ -150,17 +192,14 @@ clc; clearvars -except P PGS GNOMAD
 
 
 
-%N = .20;
+close all; histogram(GNOMAD.AF(GNOMAD.isSV==1 & GNOMAD.AF>.02),.02:.01:.5);
+hold on;   histogram(GNOMAD.AF(GNOMAD.isLOF==1 & GNOMAD.AF>.02),.02:.01:.5);
 
-N = .05;
-
-GNOMAD(GNOMAD.AF > N ,:) = [];
-
+GNOMAD(GNOMAD.AF > .30 , :) = [];
 
 
-
-
-
+close all; histogram(GNOMAD.AF(GNOMAD.isSV==1 & GNOMAD.AF>.02),.02:.01:.5);
+hold on;   histogram(GNOMAD.AF(GNOMAD.isLOF==1 & GNOMAD.AF>.02),.02:.01:.5);
 
 
 Nreport(GNOMAD)
@@ -190,184 +229,15 @@ clc; clearvars -except P PGS GNOMAD
 GNOM = GNOMAD;
 [C,ia,ic] = unique([GNOM.CHR GNOM.POS GNOM.AC],'rows','stable');
 GNOM = GNOM(ia,:);
+
+GNOM = GENEijk(GNOM);
+
+
+
 GNOMAD = GNOM;
 
 
-GNOMAD = GENEijk(GNOMAD);
-
-
-
-
-
-
 Nreport(GNOMAD)
-%==========================================================================
-%% IMPORT OMIM DATA
-%==========================================================================
-clc; clearvars -except P PGS GNOMAD
-
-
-
-% ABOUT OMIM
-%---------------------------------------------
-%{
-Welcome to OMIM®, Online Mendelian Inheritance in Man®. OMIM is a
-comprehensive, authoritative compendium of human genes and genetic
-phenotypes that is freely available and updated daily. The full-text,
-referenced overviews in OMIM contain information on all known mendelian
-disorders and over 15,000 genes. OMIM focuses on the relationship between
-phenotype and genotype. It is updated daily, and the entries contain
-copious links to other genetics resources.
-
-This database was initiated in the early 1960s by Dr. Victor A. McKusick as
-a catalog of mendelian traits and disorders, entitled Mendelian Inheritance
-in Man (MIM). Twelve book editions of MIM were published between 1966 and
-1998. The online version, OMIM, was created in 1985 by a collaboration
-between the National Library of Medicine and the William H. Welch Medical
-Library at Johns Hopkins. It was made generally available on the internet
-starting in 1987. In 1995, OMIM was developed for the World Wide Web by
-NCBI, the National Center for Biotechnology Information.
-
-OMIM is authored and edited at the McKusick-Nathans Institute of Genetic
-Medicine, Johns Hopkins University School of Medicine, under the direction
-of Dr. Ada Hamosh.
-
-
-https://www.omim.org/about
-
-https://www.omim.org/static/omim/data/mim2gene.txt
-
-%}
-%---------------------------------------------
-
-
-
-P.mim = '/Users/bradleymonk/Documents/MATLAB/UCSF/PGS/GNOMAD2/PGS_CSV/omim/mim2gene.txt';
-
-OPT = detectImportOptions(P.mim);
-TBL = readtable(P.mim,OPT);
-
-
-[ai,bi] = ismember(GNOMAD.GENE,TBL.GeneSym);
-
-
-GNOMAD.MIMNumber = nan(height(GNOMAD),1);
-GNOMAD.MIMNumber(ai) = TBL.MIMNumber(bi(ai),:);
-
-
-sum(~isnan(GNOMAD.MIMNumber)) / height(GNOMAD)
-
-sum(GNOMAD.HAS_OMIM) / height(GNOMAD)
-
-
-
-%return
-%==========================================================================
-%% IMPORT CLINVAR DATA
-%==========================================================================
-clc; clearvars -except P PGS GNOMAD
-
-
-
-
-% ABOUT CLINVAR
-%---------------------------------------------
-%{
-ClinVar is a a freely accessible, public archive of reports of the
-relationships among human variations and phenotypes hosted by the National
-Center for Biotechnology Information (NCBI) and funded by intramural
-National Institutes of Health (NIH) funding.
-
-
-https://www.clinicalgenome.org/data-sharing/clinvar/
-
-https://ftp.ncbi.nlm.nih.gov/pub/clinvar/
-
-%}
-%---------------------------------------------
-
-
-P.clin = '/Users/bradleymonk/Documents/MATLAB/UCSF/PGS/GNOMAD2/PGS_CSV/omim/clinvar.txt';
-
-OPT = detectImportOptions(P.clin);
-TBL = readtable(P.clin,OPT);
-
-TBL = convertvars(TBL,@iscell,'string');
-
-
-GNOMAD.CHRPOS = uint64(GNOMAD.CHR .* 10000000000 + GNOMAD.POS);
-TBL.CHRPOS    = uint64(TBL.chrom .* 10000000000 + TBL.pos);
-
-
-[ai,bi] = ismember(GNOMAD.CHRPOS,TBL.CHRPOS);
-
-
-GNOMAD.CLINVAR_PATHOGENIC           = nan(height(GNOMAD),1);
-GNOMAD.CLINVAR_LIKELY_PATHOGENIC    = nan(height(GNOMAD),1);
-GNOMAD.CLINVAR_UNCERTAIN            = nan(height(GNOMAD),1);
-GNOMAD.CLINVAR_LIKELY_BENIGN        = nan(height(GNOMAD),1);
-GNOMAD.CLINVAR_BENIGN               = nan(height(GNOMAD),1);
-
-
-GNOMAD.CLINVAR_PATHOGENIC(ai)           = TBL.pathogenic(bi(ai),:);
-GNOMAD.CLINVAR_LIKELY_PATHOGENIC(ai)    = TBL.likely_pathogenic(bi(ai),:);
-GNOMAD.CLINVAR_UNCERTAIN(ai)            = TBL.uncertain_significance(bi(ai),:);
-GNOMAD.CLINVAR_LIKELY_BENIGN(ai)        = TBL.likely_benign(bi(ai),:);
-GNOMAD.CLINVAR_BENIGN(ai)               = TBL.benign(bi(ai),:);
-
-
-sum(~isnan(GNOMAD.CLINVAR_PATHOGENIC)) / height(GNOMAD)
-
-
-
-%==========================================================================
-%% IMPORT CADD SCORES
-%==========================================================================
-clc; clearvars -except P PGS GNOMAD
-
-
-
-% ABOUT CADD
-%---------------------------------------------
-%{
-
-Use STEP057_MAKE_VCF.m to create a vcf file, then upload to:
-
-https://cadd.gs.washington.edu/score
-
-Then import the tsv file below.
-
-%}
-%---------------------------------------------
-
-
-P.cadd = '/Volumes/T7/UCSF/PGS/CADD_SCORES.txt';
-
-OPT = detectImportOptions(P.cadd);
-CADD = readtable(P.cadd,OPT);
-
-
-CADD = convertvars(CADD,@iscell,'string');
-
-CADD.CHRPOS = uint64(CADD.x_Chrom .* 10000000000 + CADD.Pos);
-
-
-[ai,bi] = ismember(GNOMAD.CHRPOS,CADD.CHRPOS);
-
-
-GNOMAD.CADD_RAW         = nan(height(GNOMAD),1);
-GNOMAD.CADD_PHRED       = nan(height(GNOMAD),1);
-
-
-GNOMAD.CADD_RAW(ai)     = CADD.RawScore(bi(ai),:);
-GNOMAD.CADD_PHRED(ai)	= CADD.PHRED(bi(ai),:);
-
-
-sum(~isnan(GNOMAD.CADD_RAW)) / height(GNOMAD)
-
-
-
-
 %==========================================================================
 %% EXPORT DATASET
 %==========================================================================

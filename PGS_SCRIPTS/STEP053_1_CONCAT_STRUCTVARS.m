@@ -247,6 +247,8 @@ STRVAR.INFO = [];
 
 unique(STRVAR.ALT)
 unique(STRVAR.CHR)
+unique(STRVAR.REF)
+unique(STRVAR.ALT)
 
 
 

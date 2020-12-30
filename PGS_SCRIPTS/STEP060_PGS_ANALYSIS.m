@@ -64,7 +64,7 @@ Constraint = high pLI
 %==========================================================================
 clc; clearvars -except P
 
-PGS = load([P.mat P.f 'PGS_STEP056_OUTPUT.mat']);
+PGS = load([P.mat P.f 'PGS_STEP058_OUTPUT.mat']);
 
 
 
@@ -73,13 +73,29 @@ GNOMAD  = PGS.GNOMAD;   % GNOMAD DATASET
 
 
 peek(GNOMAD)
-% GNOMAD COLUMNS   1-111
-% PLI    COLUMNS 112-121
-% DAWES  COLUMNS 122-183
-% MK1    COLUMNS 184-216
-% MK2    COLUMNS 217-276
-% SCR    COLUMNS 277-279
-% TARG   COLUMNS 280-286
+
+
+
+% GNOMAD DATASET COLUMN REFERENCE
+%----------------------------------------------------------------
+% GNOMAD COLUMNS    T.GENEi               -    T.isSV
+% PLI    COLUMNS    T.pLI                 -    T.oe_lof
+% DAWES  COLUMNS    T.hgnc_id             -    T.isdawes
+% MK1    COLUMNS    T.MKO1_TARGETS        -    T.placenta
+% MK2    COLUMNS    T.HOMOLO_GENE_ID      -    T.MKO2_TARGETS
+% SCR    COLUMNS    T.INVITAE             -    T.MYRIAD
+% TARG   COLUMNS    T.HAS_OMIM            -    T.MOUSE2_TARGETS
+% OMIM   COLUMNS    T.MIMNumber           -    T.MIMNumber
+% CLIN   COLUMNS    T.CLINVAR_PATHOGENIC  -    T.CLINVAR_BENIGN
+% CADD   COLUMNS    T.CADD_RAW            -    T.CADD_PHRED
+%----------------------------------------------------------------
+
+
+
+
+
+
+
 %==========================================================================
 %% CREATE GENE SETS
 %==========================================================================

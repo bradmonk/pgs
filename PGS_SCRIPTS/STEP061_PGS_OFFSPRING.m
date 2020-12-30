@@ -101,7 +101,7 @@ Svetlana this is the most common mutation)
 %==========================================================================
 clc; clearvars -except P
 
-PGS = load([P.mat P.f 'PGS_STEP056_OUTPUT.mat']);
+PGS = load([P.mat P.f 'PGS_STEP058_OUTPUT.mat']);
 
 
 
@@ -110,15 +110,30 @@ GNOMAD  = PGS.GNOMAD;   % GNOMAD DATASET
 
 
 peek(GNOMAD)
-% GNOMAD COLUMNS   1-111
-% PLI    COLUMNS 112-121
-% DAWES  COLUMNS 122-183
-% MK1    COLUMNS 184-216
-% MK2    COLUMNS 217-276
-% SCR    COLUMNS 277-279
-% TARG   COLUMNS 280-286
-% OMIM   COLUMNS 287
-% CLIN   COLUMNS 288-293
+
+
+% GNOMAD DATASET COLUMN REFERENCE
+%----------------------------------------------------------------
+% GNOMAD COLUMNS    T.GENEi               -    T.isSV
+% PLI    COLUMNS    T.pLI                 -    T.oe_lof
+% DAWES  COLUMNS    T.hgnc_id             -    T.isdawes
+% MK1    COLUMNS    T.MKO1_TARGETS        -    T.placenta
+% MK2    COLUMNS    T.HOMOLO_GENE_ID      -    T.MKO2_TARGETS
+% SCR    COLUMNS    T.INVITAE             -    T.MYRIAD
+% TARG   COLUMNS    T.HAS_OMIM            -    T.MOUSE2_TARGETS
+% OMIM   COLUMNS    T.MIMNumber           -    T.MIMNumber
+% CLIN   COLUMNS    T.CLINVAR_PATHOGENIC  -    T.CLINVAR_BENIGN
+% CADD   COLUMNS    T.CADD_RAW            -    T.CADD_PHRED
+%----------------------------------------------------------------
+
+
+sum(GNOMAD.HAS_OMIM) / height(GNOMAD)
+sum(~isnan(GNOMAD.MIMNumber)) / height(GNOMAD)
+sum(~isnan(GNOMAD.CLINVAR_PATHOGENIC)) / height(GNOMAD)
+sum(~isnan(GNOMAD.CADD_RAW)) / height(GNOMAD)
+
+
+
 %==========================================================================
 %% CREATE GENE SETS
 %==========================================================================
@@ -322,8 +337,7 @@ clc; clearvars -except P PGS GNOMAD GSET
 % TBL = GSET.PAN;
 % TBL = GSET.HMKnP;
 TBL = GSET.HMK;
-peek(TBL)
-TBL.Properties.VariableNames
+
 
 
 TBL    = GENEijk(TBL); 
@@ -334,8 +348,9 @@ PrJVCR = nanmean(pr_jvcr(TBL),2);
 PrGCR  = nanmean(pr_gcr(TBL),2);
 PrJGCR = nanmean(pr_jgcr(TBL),2);
 
-PctJGCR = PrJGCR .* 100
-x = (1:numel(PrJGCR))';
+
+% PctJGCR = PrJGCR .* 100
+% x = (1:numel(PrJGCR))';
 
 
 
@@ -443,8 +458,8 @@ clc; clearvars -except P PGS GNOMAD GSET
 
 
 
-TBL = GSET.PAN;
-TBL = GSET.HMKnP;
+% TBL = GSET.PAN;
+% TBL = GSET.HMKnP;
 TBL = GSET.HMK;
 
 
