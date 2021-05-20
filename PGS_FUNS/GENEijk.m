@@ -46,13 +46,13 @@ TBL.GENEi = GENEi;
 % GENEj: the first VAR in each gene is given a "1"
 TBL.GENEj(GENEj) = 1;
 TBL.GENEj = TBL.GENEj>0;
-
+TBL.GENEj = double(TBL.GENEj);
 
 
 % GENEj: the first VAR in each gene is given a unique number from 1:Ngenes
 GENEk = cumsum(TBL.GENEj);
 TBL.GENEk = GENEk;
-TBL.GENEk(~TBL.GENEj) = 0;
+TBL.GENEk(TBL.GENEj==0) = 0;
 
 
 

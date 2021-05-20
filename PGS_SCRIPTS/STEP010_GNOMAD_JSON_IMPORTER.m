@@ -21,10 +21,10 @@ cd(P.home); P.f = filesep;
 clearvars -except P
 
 
-P.CHR = 'CHR01';
+P.CHR   = 'CHR24';
 
 
-JSON = jsondecode(fileread([P.json P.f P.CHR '.json']));
+JSON = jsondecode(fileread([P.json P.f 'run02' P.f P.CHR '.json']));
 
 
 
@@ -41,6 +41,12 @@ TAB = struct2table(JSON);
 peek(TAB)
 
 
+
+TAB.Properties.VariableNames{'reference_name'} = 'CHR';
+
+TAB = movevars(TAB,{'CHR'},'Before','start_position');
+
+
 if strcmp(TAB.CHR{1},'X')
     TAB.CHR(:) = {'23'};
 end
@@ -48,6 +54,81 @@ if strcmp(TAB.CHR{1},'Y')
     TAB.CHR(:) = {'24'};
 end
 
+
+
+
+% CONVERT EVERYTHING TO CELLSTR
+V = TAB.Properties.VariableNames;
+for i = 1:size(TAB,2)
+    if ~iscell(TAB{1,i})
+        TAB.(V{i}) = cellstr(string(TAB{:,i}));
+    end
+end
+
+
+
+
+% FILL MISSING CELLS WITH 'NaN'
+for i = 1:size(TAB,2)
+    EM = cellfun(@isempty,TAB{:,i});
+    TAB{EM,i} = {'NaN'};
+end
+
+
+
+% CONVERT ALL TABLE COLUMNS TO STRINGS
+TAB = convertvars(TAB,@iscell,'string');
+
+
+
+% CONVERT APPROPRIATE VARIABLES FROM STRINGS TO DOUBLE
+V = TAB.Properties.VariableNames;
+
+EM = cellfun(@isletter,TAB{1,:},'UniformOutput',false);
+for i = 1:numel(EM)
+    
+    if all(~EM{i})
+        TAB.(V{i}) = double(TAB{:,i});
+    end
+    
+end
+
+
+
+
+% CONVERT APPROPRIATE VARIABLES FROM STRINGS TO LOGICALS
+V = TAB.Properties.VariableNames;
+i = 237;
+for i = 1:size(TAB,2)
+
+    if isstring(TAB{:,i})
+        t = TAB{:,i} == "true";
+        f = TAB{:,i} == "false";
+
+        if any(t)
+
+            TAB{t,i} = 1;
+            TAB{f,i} = 0;
+            TAB{~t & ~f,i} = NaN;
+            TAB.(V{i}) = double(TAB{:,i});
+
+        end
+    end
+
+
+end
+
+
+peek(TAB)
+
+
+
+
+%==========================================================================
+%% FORMAT VARIABLES
+%==========================================================================
+
+%{
 
 
 TAB.CHR 					= double(string(char(TAB.CHR)));
@@ -93,12 +174,15 @@ TAB.SYMBOL_SOURCE 			= string(TAB.SYMBOL_SOURCE);
 TAB.ENSP 					= string(TAB.ENSP);
 TAB.UNIPARC 				= string(TAB.UNIPARC);
 TAB.LOF 					= string(TAB.LOF);
+%}
 
 
 
-%%
+%==========================================================================
+%% FORMAT VARIABLES
+%==========================================================================
 
-
+%{
 EM = cellfun(@isempty,TAB.AF_MALE);              TAB.AF_MALE(EM) = {'NaN'};
 EM = cellfun(@isempty,TAB.AF_FEMALE);            TAB.AF_FEMALE(EM) = {'NaN'};
 EM = cellfun(@isempty,TAB.NHOMALT_MALE);         TAB.NHOMALT_MALE(EM) = {'NaN'};
@@ -146,13 +230,15 @@ EM = cellfun(@isempty,TAB.CLIN_SIG);             TAB.CLIN_SIG(EM) = {'NaN'};
 EM = cellfun(@isempty,TAB.SOMATIC);              TAB.SOMATIC(EM) = {'NaN'};
 EM = cellfun(@isempty,TAB.PHENO);                TAB.PHENO(EM) = {'NaN'};
 EM = cellfun(@isempty,TAB.LOF_FLAGS);            TAB.LOF_FLAGS(EM) = {'NaN'};
+%}
 
 
 
+%==========================================================================
+%% FORMAT VARIABLES
+%==========================================================================
 
-
-%%
-
+%{
 TAB.AF_MALE 				= double(string(char(TAB.AF_MALE)));
 TAB.AF_FEMALE 				= double(string(char(TAB.AF_FEMALE)));
 TAB.NHOMALT_MALE 			= double(string(char(TAB.NHOMALT_MALE)));
@@ -200,7 +286,7 @@ TAB.CLIN_SIG 				= string(TAB.CLIN_SIG);
 TAB.SOMATIC 				= string(TAB.SOMATIC);
 TAB.PHENO 					= string(TAB.PHENO);
 TAB.LOF_FLAGS 				= string(TAB.LOF_FLAGS);
-
+%}
 
 
 
@@ -215,5 +301,5 @@ TAB.LOF_FLAGS 				= string(TAB.LOF_FLAGS);
 clearvars -except P JSON TAB
 
 
-save([P.gnomat P.f P.CHR '.mat'],'TAB');
+save([P.gnomat P.f 'run02' P.f P.CHR '.mat'],'TAB');
 

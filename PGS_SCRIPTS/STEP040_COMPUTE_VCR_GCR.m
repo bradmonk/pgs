@@ -24,15 +24,13 @@ cd(P.home); P.f = filesep;
 clearvars -except P
 
 
-M = load([P.mat P.f 'PGS_STEP030_OUTPUT.mat']);
+PGS = load([P.mat P.f 'PGS_STEP030_OUTPUT.mat']);
 
-GNOMAD  = M.GNOMAD;
-HUMAN   = M.HUMAN;
-MOUSE   = M.MOUSE;
-CLINVAR = M.CLINVAR;
+GNOMAD  = PGS.GNOMAD;
 
 
-unique(GNOMAD.CHR)
+
+
 
 
 
@@ -52,13 +50,36 @@ unique(GNOMAD.CHR)
 % AC:  count of ALT alleles (ALT_HOM + ALT_HET)
 % HOM: count of homozygous ALT people (ALT_HOM)
 %--------------------------------------------------------------------------
-clc; clearvars -except P GNOMAD HUMAN MOUSE CLINVAR
+clc; clearvars -except P PGS GNOMAD
 
 
+peek(GNOMAD)
 
 
-% COMPUTE VCR FOR EACH VARIANT
-GNOMAD.VCR = (GNOMAD.AC - GNOMAD.NHOMALT) ./ (.5 .* GNOMAD.AN);
+GNOMAD.VCR = (GNOMAD.AC - GNOMAD.nhomalt) ./ (.5 .* GNOMAD.AN);
+
+GNOMAD.VCR_raw          = (GNOMAD.AC_raw - GNOMAD.nhomalt_raw)          ./ (.5 .* GNOMAD.AN_raw);
+GNOMAD.VCR_popmax       = (GNOMAD.AC_popmax - GNOMAD.nhomalt_popmax)    ./ (.5 .* GNOMAD.AN_popmax);
+
+GNOMAD.VCR_afr          = (GNOMAD.AC_afr - GNOMAD.nhomalt_afr)          ./ (.5 .* GNOMAD.AN_afr);
+GNOMAD.VCR_amr          = (GNOMAD.AC_amr - GNOMAD.nhomalt_amr)          ./ (.5 .* GNOMAD.AN_amr);
+GNOMAD.VCR_asj          = (GNOMAD.AC_asj - GNOMAD.nhomalt_asj)          ./ (.5 .* GNOMAD.AN_asj);
+GNOMAD.VCR_eas          = (GNOMAD.AC_eas - GNOMAD.nhomalt_eas)          ./ (.5 .* GNOMAD.AN_eas);
+GNOMAD.VCR_eas_jpn      = (GNOMAD.AC_eas_jpn - GNOMAD.nhomalt_eas_jpn)  ./ (.5 .* GNOMAD.AN_eas_jpn);
+GNOMAD.VCR_eas_kor      = (GNOMAD.AC_eas_kor - GNOMAD.nhomalt_eas_kor)  ./ (.5 .* GNOMAD.AN_eas_kor);
+GNOMAD.VCR_eas_oea      = (GNOMAD.AC_eas_oea - GNOMAD.nhomalt_eas_oea)  ./ (.5 .* GNOMAD.AN_eas_oea);
+GNOMAD.VCR_fin          = (GNOMAD.AC_fin - GNOMAD.nhomalt_fin)          ./ (.5 .* GNOMAD.AN_fin);
+GNOMAD.VCR_nfe          = (GNOMAD.AC_nfe - GNOMAD.nhomalt_nfe)          ./ (.5 .* GNOMAD.AN_nfe);
+GNOMAD.VCR_nfe_bgr      = (GNOMAD.AC_nfe_bgr - GNOMAD.nhomalt_nfe_bgr)  ./ (.5 .* GNOMAD.AN_nfe_bgr);
+GNOMAD.VCR_nfe_est      = (GNOMAD.AC_nfe_est - GNOMAD.nhomalt_nfe_est)  ./ (.5 .* GNOMAD.AN_nfe_est);
+GNOMAD.VCR_nfe_nwe      = (GNOMAD.AC_nfe_nwe - GNOMAD.nhomalt_nfe_nwe)  ./ (.5 .* GNOMAD.AN_nfe_nwe);
+GNOMAD.VCR_nfe_onf      = (GNOMAD.AC_nfe_onf - GNOMAD.nhomalt_nfe_onf)  ./ (.5 .* GNOMAD.AN_nfe_onf);
+GNOMAD.VCR_nfe_seu      = (GNOMAD.AC_nfe_seu - GNOMAD.nhomalt_nfe_seu)  ./ (.5 .* GNOMAD.AN_nfe_seu);
+GNOMAD.VCR_nfe_swe      = (GNOMAD.AC_nfe_swe - GNOMAD.nhomalt_nfe_swe)  ./ (.5 .* GNOMAD.AN_nfe_swe);
+GNOMAD.VCR_oth          = (GNOMAD.AC_oth - GNOMAD.nhomalt_oth)          ./ (.5 .* GNOMAD.AN_oth);
+GNOMAD.VCR_sas          = (GNOMAD.AC_sas - GNOMAD.nhomalt_sas)          ./ (.5 .* GNOMAD.AN_sas);
+
+
 
 
 
@@ -78,7 +99,10 @@ GNOMAD.VCR = (GNOMAD.AC - GNOMAD.NHOMALT) ./ (.5 .* GNOMAD.AN);
 % variants 1:k of a given gene.
 % 
 %--------------------------------------------------------------------------
-clc; clearvars -except P GNOMAD HUMAN MOUSE CLINVAR
+clc; clearvars -except P PGS GNOMAD
+
+
+
 
 
 
@@ -86,14 +110,28 @@ clc; clearvars -except P GNOMAD HUMAN MOUSE CLINVAR
 % ADD GCR COLUMN TO TABLE
 GNOMAD.GCR = nan(height(GNOMAD),1);
 
+GNOMAD.GCR_raw      = nan(height(GNOMAD),1);
+GNOMAD.GCR_popmax   = nan(height(GNOMAD),1);
+GNOMAD.GCR_afr      = nan(height(GNOMAD),1);
+GNOMAD.GCR_amr      = nan(height(GNOMAD),1);
+GNOMAD.GCR_asj      = nan(height(GNOMAD),1);
+GNOMAD.GCR_eas      = nan(height(GNOMAD),1);
+GNOMAD.GCR_eas_jpn  = nan(height(GNOMAD),1);
+GNOMAD.GCR_eas_kor  = nan(height(GNOMAD),1);
+GNOMAD.GCR_eas_oea  = nan(height(GNOMAD),1);
+GNOMAD.GCR_fin      = nan(height(GNOMAD),1);
+GNOMAD.GCR_nfe      = nan(height(GNOMAD),1);
+GNOMAD.GCR_nfe_bgr  = nan(height(GNOMAD),1);
+GNOMAD.GCR_nfe_est  = nan(height(GNOMAD),1);
+GNOMAD.GCR_nfe_nwe  = nan(height(GNOMAD),1);
+GNOMAD.GCR_nfe_onf  = nan(height(GNOMAD),1);
+GNOMAD.GCR_nfe_seu  = nan(height(GNOMAD),1);
+GNOMAD.GCR_nfe_swe  = nan(height(GNOMAD),1);
+GNOMAD.GCR_oth      = nan(height(GNOMAD),1);
+GNOMAD.GCR_sas      = nan(height(GNOMAD),1);
 
 
-
-% GET ARRAY INDEX LOCATIONS FOR EACH GENE
-[~,~,GNOMAD.GENEi] = unique(GNOMAD.geneID,'stable');
-
-
-
+GNOMAD = GENEijk(GNOMAD);
 
 
 % COMPUTE GCR FOR EACH GENE
@@ -101,7 +139,29 @@ for g = 1:numel(unique(GNOMAD.GENEi))
 
     GNOMAD.GCR(GNOMAD.GENEi==g) = 1 - prod(1 - GNOMAD.VCR(GNOMAD.GENEi==g));
 
+    GNOMAD.GCR_raw(GNOMAD.GENEi==g)          = 1 - prod(1 - GNOMAD.VCR_raw(GNOMAD.GENEi==g));
+    GNOMAD.GCR_popmax(GNOMAD.GENEi==g)       = 1 - prod(1 - GNOMAD.VCR_popmax(GNOMAD.GENEi==g));
+    GNOMAD.GCR_afr(GNOMAD.GENEi==g)          = 1 - prod(1 - GNOMAD.VCR_afr(GNOMAD.GENEi==g));
+    GNOMAD.GCR_amr(GNOMAD.GENEi==g)          = 1 - prod(1 - GNOMAD.VCR_amr(GNOMAD.GENEi==g));
+    GNOMAD.GCR_asj(GNOMAD.GENEi==g)          = 1 - prod(1 - GNOMAD.VCR_asj(GNOMAD.GENEi==g));
+    GNOMAD.GCR_eas(GNOMAD.GENEi==g)          = 1 - prod(1 - GNOMAD.VCR_eas(GNOMAD.GENEi==g));
+    GNOMAD.GCR_eas_jpn(GNOMAD.GENEi==g)      = 1 - prod(1 - GNOMAD.VCR_eas_jpn(GNOMAD.GENEi==g));
+    GNOMAD.GCR_eas_kor(GNOMAD.GENEi==g)      = 1 - prod(1 - GNOMAD.VCR_eas_kor(GNOMAD.GENEi==g));
+    GNOMAD.GCR_eas_oea(GNOMAD.GENEi==g)      = 1 - prod(1 - GNOMAD.VCR_eas_oea(GNOMAD.GENEi==g));
+    GNOMAD.GCR_fin(GNOMAD.GENEi==g)          = 1 - prod(1 - GNOMAD.VCR_fin(GNOMAD.GENEi==g));
+    GNOMAD.GCR_nfe(GNOMAD.GENEi==g)          = 1 - prod(1 - GNOMAD.VCR_nfe(GNOMAD.GENEi==g));
+    GNOMAD.GCR_nfe_bgr(GNOMAD.GENEi==g)      = 1 - prod(1 - GNOMAD.VCR_nfe_bgr(GNOMAD.GENEi==g));
+    GNOMAD.GCR_nfe_est(GNOMAD.GENEi==g)      = 1 - prod(1 - GNOMAD.VCR_nfe_est(GNOMAD.GENEi==g));
+    GNOMAD.GCR_nfe_nwe(GNOMAD.GENEi==g)      = 1 - prod(1 - GNOMAD.VCR_nfe_nwe(GNOMAD.GENEi==g));
+    GNOMAD.GCR_nfe_onf(GNOMAD.GENEi==g)      = 1 - prod(1 - GNOMAD.VCR_nfe_onf(GNOMAD.GENEi==g));
+    GNOMAD.GCR_nfe_seu(GNOMAD.GENEi==g)      = 1 - prod(1 - GNOMAD.VCR_nfe_seu(GNOMAD.GENEi==g));
+    GNOMAD.GCR_nfe_swe(GNOMAD.GENEi==g)      = 1 - prod(1 - GNOMAD.VCR_nfe_swe(GNOMAD.GENEi==g));
+    GNOMAD.GCR_oth(GNOMAD.GENEi==g)          = 1 - prod(1 - GNOMAD.VCR_oth(GNOMAD.GENEi==g));
+    GNOMAD.GCR_sas(GNOMAD.GENEi==g)          = 1 - prod(1 - GNOMAD.VCR_sas(GNOMAD.GENEi==g));
+
+
 end
+
 
 
 
@@ -153,17 +213,6 @@ end
 
 
 
-%==========================================================================
-%% ADD VARIABLE DESCRIPTIONS
-%==========================================================================
-
-
-GNOMAD.Properties.VariableDescriptions{'AF'} = 'Alternate allele frequency in samples; AF = AC/AN';
-GNOMAD.Properties.VariableDescriptions{'VCR'} = 'Variant Carrier Rate; VCR=(AC-NHOMALT)/(.5*AN)';
-GNOMAD.Properties.VariableDescriptions{'GCR'} = 'Gene Carrier Rate; GCR = 1 - prod(1 - VCR(i:j));';
-GNOMAD.Properties.VariableDescriptions{'GENEi'} = 'Unique gene integer';
-
-
 
 
 
@@ -171,11 +220,17 @@ GNOMAD.Properties.VariableDescriptions{'GENEi'} = 'Unique gene integer';
 %==========================================================================
 %% EXPORT DATASET
 %==========================================================================
-clc; clearvars -except P GNOMAD HUMAN MOUSE CLINVAR
+clc; clearvars -except P PGS GNOMAD
 
-save([P.mat P.f 'PGS_STEP040_OUTPUT.mat'],'GNOMAD','HUMAN','MOUSE','CLINVAR');
 
-writetable(GNOMAD,[P.csv P.f 'PGS_STEP040_OUTPUT.csv'])
+DATAS = PGS.DATAS;
+
+
+save([P.mat P.f 'PGS_STEP040_OUTPUT.mat'],'GNOMAD','DATAS');
+
+
+
+% writetable(GNOMAD,[P.csv P.f 'PGS_STEP040_OUTPUT.csv'])
 
 
 

@@ -1,8 +1,17 @@
-function [TBL] = vcr(TBL)
-
-TBL.VCR = (TBL.AC - TBL.NHOMALT) ./ (.5 .* TBL.AN);
+function [VCR] = vcr(AN,AC,nhomalt)
 
 
-TBL = movevars(TBL,{'VCR'},'After','GENE');
+
+
+%TBL.VCR = (TBL.AC - TBL.nhomalt) ./ (.5 .* TBL.AN);
+%TBL = movevars(TBL,{'VCR'},'After','GENE');
+
+
+
+VCR = (AC - nhomalt) ./ (.5 .* AN);
+
+
+
+
 
 end

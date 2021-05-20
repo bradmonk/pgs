@@ -19,41 +19,12 @@ cd(P.home); P.f = filesep;
 %==========================================================================
 %% LOAD DATASET
 %==========================================================================
-clc; clearvars -except P
+clc; clearvars -except P PGS
 
 
-PGS = load([P.mat P.f 'PGS_STEP050_OUTPUT.mat']);
+PGS = load([P.mat P.f 'PGS_STEP043_OUTPUT.mat']);
 
 GNOMAD  = PGS.GNOMAD;
-CLINVAR = PGS.CLINVAR;
-HUMAN   = PGS.HUMAN;
-MOUSE   = PGS.MOUSE;
-
-
-o = detectImportOptions([P.csv P.f 'gnomad.v2.1.1.all_lofs.csv']);
-LOFS = readtable([P.csv P.f 'gnomad.v2.1.1.all_lofs.csv'],o);
-
-
-unique(LOFS.most_severe_consequence)
-
-
-
-
-
-
-
-
-
-
-%==========================================================================
-%% INCREASE ALL ALLELE POS BY +1 TO MATCH GNOMAD WEBSITE POS
-%==========================================================================
-clc; clearvars -except P GNOMAD HUMAN MOUSE CLINVAR
-
-
-
-GNOMAD.POS = GNOMAD.POS + 1;
-
 
 
 
@@ -62,7 +33,7 @@ GNOMAD.POS = GNOMAD.POS + 1;
 %==========================================================================
 %% CREATE "RC" COLUMN FOR REF COUNTS
 %==========================================================================
-clc; clearvars -except P GNOMAD HUMAN MOUSE CLINVAR
+clc; clearvars -except P PGS GNOMAD
 
 
 
@@ -82,14 +53,14 @@ hint(GNOMAD,'RC');
 %==========================================================================
 %% REORGANIZE TABLE COLUMNS
 %==========================================================================
-clc; clearvars -except P GNOMAD HUMAN MOUSE CLINVAR
+clc; clearvars -except P PGS GNOMAD
 
 
 
 
-GNOMAD = movevars(GNOMAD,{'geneID','rs','refBase','altBase','altAllele',},'After','AF');
-GNOMAD = movevars(GNOMAD,{'AN_raw','AN_male','AN_female'},'After','AF');
-GNOMAD = movevars(GNOMAD,{'NHOMALT'},'After','AF');
+% GNOMAD = movevars(GNOMAD,{'geneID','rs','refBase','altBase','altAllele',},'After','AF');
+% GNOMAD = movevars(GNOMAD,{'AN_raw','AN_male','AN_female'},'After','AF');
+% GNOMAD = movevars(GNOMAD,{'NHOMALT'},'After','AF');
 
 
 
@@ -98,7 +69,7 @@ GNOMAD = movevars(GNOMAD,{'NHOMALT'},'After','AF');
 %==========================================================================
 %% REMOVE SITES WITH FEW SEQUENCED ALLELES (AN)
 %==========================================================================
-% clc; clearvars -except P GNOMAD HUMAN MOUSE CLINVAR
+% clc; clearvars -except P PGS GNOMAD
 % 
 % 
 % GNOM = GNOMAD;
@@ -137,7 +108,7 @@ GNOMAD = movevars(GNOMAD,{'NHOMALT'},'After','AF');
 %==========================================================================
 %% SAVE A TABLE WITHOUT SEX CHROMOSOMES
 %==========================================================================
-% clc; clearvars -except P GNOMAD HUMAN MOUSE CLINVAR
+% clc; clearvars -except P PGS GNOMAD
 % 
 % 
 % 
@@ -152,7 +123,7 @@ GNOMAD = movevars(GNOMAD,{'NHOMALT'},'After','AF');
 %==========================================================================
 %% COMPUTE ALLELE FREQUENCIES
 %==========================================================================
-clc; clearvars -except P GNOMAD HUMAN MOUSE CLINVAR
+clc; clearvars -except P PGS GNOMAD
 % 
 % At single locus with two alleles R and A with frequencies fR and fA,
 % respectively, the expected genotype frequencies under random mating are:
@@ -169,7 +140,7 @@ clc; clearvars -except P GNOMAD HUMAN MOUSE CLINVAR
 N   = GNOMAD.AN;
 A   = GNOMAD.AC;
 R   = GNOMAD.RC;
-AA  = GNOMAD.NHOMALT;
+AA  = GNOMAD.nhomalt;
 
 
 
@@ -218,7 +189,7 @@ GNOMAD.HW_fRA = HW_fRA;
 %==========================================================================
 %% ADD BETTER VARIABLE DESCRIPTIONS
 %==========================================================================
-clc; clearvars -except P GNOMAD HUMAN MOUSE CLINVAR
+clc; clearvars -except P PGS GNOMAD
 
 
 % GNOMAD.Properties.VariableDescriptions{'AF'} = ...
@@ -228,14 +199,14 @@ clc; clearvars -except P GNOMAD HUMAN MOUSE CLINVAR
 hint(GNOMAD,'AN');
 hint(GNOMAD,'AC');
 hint(GNOMAD,'AF');
-hint(GNOMAD,'NHOMALT');
+hint(GNOMAD,'nhomalt');
 hint(GNOMAD,'VCR');
 hint(GNOMAD,'GCR');
 
 GNOMAD = hint(GNOMAD,'AN','total alleles measured (2 per person).');
 GNOMAD = hint(GNOMAD,'AC','alt allele count (+1 ref|alt; +2 alt|alt)');
 GNOMAD = hint(GNOMAD,'AF','AC/AN; MAF, alt allele frequency');
-GNOMAD = hint(GNOMAD,'NHOMALT','homozygous PEOPLE count (not chr)');
+GNOMAD = hint(GNOMAD,'nhomalt','homozygous PEOPLE count (not chr)');
 GNOMAD = hint(GNOMAD,'VCR','(AC-NHOMALT)/(AN/2); variant carrier rate');
 GNOMAD = hint(GNOMAD,'GCR','1-prod(1-VCR(idx)); gene carrier rate');
 
@@ -274,10 +245,10 @@ GNOMAD = hint(GNOMAD,'HW_fRA','Ref/Alt Hardy-Weinberg frequency (2*fR*fA)');
 %==========================================================================
 %% PLOT HARDY WEINBERG FREQUENCIES
 %==========================================================================
-clc; clearvars -except P GNOMAD HUMAN MOUSE CLINVAR
+clc; clearvars -except P PGS GNOMAD
 
 
-FREQ = GNOMAD(GNOMAD.CHR ~= 23 , :);
+FREQ = GNOMAD( (GNOMAD.CHR ~= 23) | (GNOMAD.CHR ~= 24) , :);
 
 
 
@@ -308,10 +279,10 @@ ph4 = scatter( FREQ.fAA, FREQ.fRA ,...
 %==========================================================================
 %% PLOT HARDY WEINBERG FREQUENCIES: fRR
 %==========================================================================
-clc; clearvars -except P GNOMAD HUMAN MOUSE CLINVAR
+clc; clearvars -except P PGS GNOMAD
 
 
-FREQ = GNOMAD(GNOMAD.CHR ~= 23 , :);
+FREQ = GNOMAD( (GNOMAD.CHR ~= 23) | (GNOMAD.CHR ~= 24) , :);
 
 
 
@@ -338,10 +309,10 @@ hold on;
 %==========================================================================
 %% PLOT HARDY WEINBERG FREQUENCIES: fAA
 %==========================================================================
-clc; clearvars -except P GNOMAD HUMAN MOUSE CLINVAR
+clc; clearvars -except P PGS GNOMAD
 
 
-FREQ = GNOMAD(GNOMAD.CHR ~= 23 , :);
+FREQ = GNOMAD( (GNOMAD.CHR ~= 23) | (GNOMAD.CHR ~= 24) , :);
 
 
 
@@ -368,10 +339,10 @@ axis([0 1 0 1])
 %==========================================================================
 %% PLOT HARDY WEINBERG FREQUENCIES: fRA
 %==========================================================================
-clc; clearvars -except P GNOMAD HUMAN MOUSE CLINVAR
+clc; clearvars -except P PGS GNOMAD
 
 
-FREQ = GNOMAD(GNOMAD.CHR ~= 23 , :);
+FREQ = GNOMAD( (GNOMAD.CHR ~= 23) | (GNOMAD.CHR ~= 24) , :);
 
 
 
@@ -400,11 +371,22 @@ ph1 = scatter( FREQ.HW_fRA, FREQ.fRA ,...
 %==========================================================================
 %% EXPORT DATASET
 %==========================================================================
-clc; clearvars -except P GNOMAD HUMAN MOUSE CLINVAR
-disp('EXPORTING DATASETS...')
+clc; clearvars -except P PGS GNOMAD
 
-save([P.mat P.f 'PGS_STEP052_OUTPUT.mat'],'GNOMAD','HUMAN','MOUSE','CLINVAR');
 
-writetable(GNOMAD,[P.csv P.f 'PGS_STEP052_OUTPUT.csv'])
+DATAS = PGS.DATAS;
 
-disp('DONE!')
+
+save([P.mat P.f 'PGS_STEP046_OUTPUT.mat'],'GNOMAD','DATAS');
+
+
+%writetable(GNOMAD,[P.csv P.f 'PGS_STEP052_OUTPUT.csv'])
+
+
+
+
+
+
+
+
+

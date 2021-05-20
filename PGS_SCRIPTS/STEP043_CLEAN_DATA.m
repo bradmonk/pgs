@@ -86,9 +86,47 @@ clc; clearvars -except P
 PGS = load([P.mat P.f 'PGS_STEP040_OUTPUT.mat']);
 
 GNOMAD  = PGS.GNOMAD;
-CLINVAR = PGS.CLINVAR;
-HUMAN   = PGS.HUMAN;
-MOUSE   = PGS.MOUSE;
+
+
+
+
+
+
+
+%==========================================================================
+%% ADD VARIABLE DESCRIPTIONS
+%==========================================================================
+clc; clearvars -except P PGS GNOMAD
+
+
+
+
+GNOMAD.Properties.VariableDescriptions{'AF'} = 'Alternate allele frequency in samples; AF = AC/AN';
+GNOMAD.Properties.VariableDescriptions{'VCR'} = 'Variant Carrier Rate; VCR=(AC-NHOMALT)/(.5*AN)';
+GNOMAD.Properties.VariableDescriptions{'GCR'} = 'Gene Carrier Rate; GCR = 1 - prod(1 - VCR(i:j));';
+GNOMAD.Properties.VariableDescriptions{'GENEi'} = 'Unique gene integer';
+GNOMAD.Properties.VariableDescriptions{'GENEj'} = 'Indicates first var in a gene 0/1';
+GNOMAD.Properties.VariableDescriptions{'GENEk'} = 'Indicates first var in a gene 1,2,3...';
+
+
+
+
+
+
+
+%==========================================================================
+%%                      POS = POS + 1
+%==========================================================================
+clc; clearvars -except P PGS GNOMAD
+
+
+
+GNOMAD.POS = GNOMAD.POS + 1;
+
+GNOMAD.CHRPOS = makeCHRPOS(GNOMAD.CHR,GNOMAD.POS);
+
+GNOMAD = movevars(GNOMAD,{'CHRPOS'},'Before','CHR');
+
 
 
 
@@ -121,49 +159,15 @@ MOUSE   = PGS.MOUSE;
 % 
 % 
 %--------------------------------------------------------------------------
-clc; clearvars -except P GNOMAD CLINVAR HUMAN MOUSE
-
-
-GNOMAD.filter{1253}
-GNOMAD.filter{1254}
-GNOMAD.filter{1255}
-GNOMAD.filter{22637}
-GNOMAD.filter{22638}
-
-
-FIL = GNOMAD.filter;
-TER = repmat("NA",height(GNOMAD),1);
-
-
-% GET CLASS OF EACH CELL
-CLASS = cellfun(@class,FIL,'UniformOutput',false);
-CLASS = string(CLASS);
-gcounts( CLASS )
-[Ci,Cnames] = findgroups(CLASS);
+clc; clearvars -except P PGS GNOMAD
 
 
 
-% CONVERT ANY CHAR CLASS TO STRING CLASS
-TER(Ci == 2) = string(FIL(Ci == 2));
-gcounts( TER )
+unique(GNOMAD.filter)
 
 
-
-% CONVERT ANY CELL CLASS TO STRING CLASS
-[Ci,Cnames] = findgroups(CLASS);
-F = FIL(Ci == 1);
-% fcell = @(x) strjoin(x);
-A = cellfun(@strjoin,F,'UniformOutput',false);
-gcounts( A )
-B = string(A);
-TER(Ci == 1) = B;
-
-
-gcounts( TER )
-
-
-
-GNOMAD.filter = TER;
+%gcounts( GNOMAD.filter )
+%GNOMAD.filter = TER;
 
 
 
@@ -172,17 +176,19 @@ GNOMAD.filter = TER;
 %==========================================================================
 %% GNOMAD.inSegDup | CONVERT STRING "TRUE" OR "FALSE" TO LOGICAL CLASS
 %==========================================================================
-clc; clearvars -except P GNOMAD CLINVAR HUMAN MOUSE
+clc; clearvars -except P PGS GNOMAD
 
 
 
-VAR = GNOMAD.inSegDup;
+VAR = GNOMAD.segdup;
 
 gcounts( VAR )
 
-TF = VAR == "true";
+VAR = double(VAR);
 
-GNOMAD.inSegDup = TF;
+gcounts( VAR )
+
+GNOMAD.segdup = VAR;
 
 
 
@@ -190,17 +196,19 @@ GNOMAD.inSegDup = TF;
 %==========================================================================
 %% GNOMAD.inLowComplex | CONVERT STRING "TRUE" OR "FALSE" TO LOGICAL CLASS
 %==========================================================================
-clc; clearvars -except P GNOMAD CLINVAR HUMAN MOUSE
+clc; clearvars -except P PGS GNOMAD
 
 
 
-VAR = GNOMAD.inLowComplex;
+VAR = GNOMAD.lcr;
 
 gcounts( VAR )
 
-TF = VAR == "true";
+VAR = double(VAR);
 
-GNOMAD.inLowComplex = TF;
+gcounts( VAR )
+
+GNOMAD.lcr = VAR;
 
 
 
@@ -209,17 +217,19 @@ GNOMAD.inLowComplex = TF;
 %==========================================================================
 %% GNOMAD.inDecoy | CONVERT STRING "TRUE" OR "FALSE" TO LOGICAL CLASS
 %==========================================================================
-clc; clearvars -except P GNOMAD CLINVAR HUMAN MOUSE
+clc; clearvars -except P PGS GNOMAD
 
 
 
-VAR = GNOMAD.inDecoy;
+VAR = GNOMAD.decoy;
 
 gcounts( VAR )
 
-TF = VAR == "true";
+VAR = double(VAR);
 
-GNOMAD.inDecoy = TF;
+gcounts( VAR )
+
+GNOMAD.decoy = VAR;
 
 
 
@@ -228,7 +238,7 @@ GNOMAD.inDecoy = TF;
 %==========================================================================
 %% GNOMAD.nonpar | CONVERT STRING "TRUE" OR "FALSE" TO LOGICAL CLASS
 %==========================================================================
-clc; clearvars -except P GNOMAD CLINVAR HUMAN MOUSE
+clc; clearvars -except P PGS GNOMAD
 
 
 
@@ -236,9 +246,11 @@ VAR = GNOMAD.nonpar;
 
 gcounts( VAR )
 
-TF = VAR == "true";
+VAR = double(VAR);
 
-GNOMAD.nonpar = TF;
+gcounts( VAR )
+
+GNOMAD.nonpar = VAR;
 
 
 
@@ -248,7 +260,7 @@ GNOMAD.nonpar = TF;
 %==========================================================================
 %% GNOMAD.rf_positive_label | CONVERT STRING "TRUE" OR "FALSE" TO LOGICAL CLASS
 %==========================================================================
-clc; clearvars -except P GNOMAD CLINVAR HUMAN MOUSE
+clc; clearvars -except P PGS GNOMAD
 
 
 
@@ -256,11 +268,11 @@ VAR = GNOMAD.rf_positive_label;
 
 gcounts( VAR )
 
-TF = VAR == "true";
+VAR = double(VAR);
 
-GNOMAD.rf_positive_label = TF;
+gcounts( VAR )
 
-
+GNOMAD.rf_positive_label = VAR;
 
 
 
@@ -268,7 +280,7 @@ GNOMAD.rf_positive_label = TF;
 %==========================================================================
 %% GNOMAD.rf_negative_label | CONVERT STRING "TRUE" OR "FALSE" TO LOGICAL CLASS
 %==========================================================================
-clc; clearvars -except P GNOMAD CLINVAR HUMAN MOUSE
+clc; clearvars -except P PGS GNOMAD
 
 
 
@@ -276,9 +288,11 @@ VAR = GNOMAD.rf_negative_label;
 
 gcounts( VAR )
 
-TF = VAR == "true";
+VAR = double(VAR);
 
-GNOMAD.rf_negative_label = TF;
+gcounts( VAR )
+
+GNOMAD.rf_negative_label = VAR;
 
 
 
@@ -287,7 +301,9 @@ GNOMAD.rf_negative_label = TF;
 %==========================================================================
 %% GNOMAD.rf_train | CONVERT STRING "TRUE" OR "FALSE" TO LOGICAL CLASS
 %==========================================================================
-clc; clearvars -except P GNOMAD CLINVAR HUMAN MOUSE
+clc; clearvars -except P PGS GNOMAD
+
+
 
 
 
@@ -295,9 +311,12 @@ VAR = GNOMAD.rf_train;
 
 gcounts( VAR )
 
-TF = VAR == "true";
+VAR = double(VAR);
 
-GNOMAD.rf_train = TF;
+gcounts( VAR )
+
+GNOMAD.rf_train = VAR;
+
 
 
 
@@ -306,7 +325,7 @@ GNOMAD.rf_train = TF;
 %==========================================================================
 %% GNOMAD.was_mixed | CONVERT STRING "TRUE" OR "FALSE" TO LOGICAL CLASS
 %==========================================================================
-clc; clearvars -except P GNOMAD CLINVAR HUMAN MOUSE
+clc; clearvars -except P PGS GNOMAD
 
 
 
@@ -314,9 +333,12 @@ VAR = GNOMAD.was_mixed;
 
 gcounts( VAR )
 
-TF = VAR == "true";
+VAR = double(VAR);
 
-GNOMAD.was_mixed = TF;
+gcounts( VAR )
+
+GNOMAD.was_mixed = VAR;
+
 
 
 
@@ -324,7 +346,7 @@ GNOMAD.was_mixed = TF;
 %==========================================================================
 %% GNOMAD.has_star | CONVERT STRING "TRUE" OR "FALSE" TO LOGICAL CLASS
 %==========================================================================
-clc; clearvars -except P GNOMAD CLINVAR HUMAN MOUSE
+clc; clearvars -except P PGS GNOMAD
 
 
 
@@ -332,9 +354,11 @@ VAR = GNOMAD.has_star;
 
 gcounts( VAR )
 
-TF = VAR == "true";
+VAR = double(VAR);
 
-GNOMAD.has_star = TF;
+gcounts( VAR )
+
+GNOMAD.has_star = VAR;
 
 
 
@@ -342,17 +366,20 @@ GNOMAD.has_star = TF;
 %==========================================================================
 %% GNOMAD.strand | CONVERT STRING TO LOGICAL CLASS
 %==========================================================================
-clc; clearvars -except P GNOMAD CLINVAR HUMAN MOUSE
+clc; clearvars -except P PGS GNOMAD
 
 
 
-VAR = GNOMAD.strand;
+VAR = GNOMAD.STRAND;
 
 gcounts( VAR )
 
-TF = VAR == "1";
+VAR = double(VAR);
 
-GNOMAD.strand = TF;
+gcounts( VAR )
+
+GNOMAD.STRAND = VAR;
+
 
 
 
@@ -362,17 +389,17 @@ GNOMAD.strand = TF;
 %==========================================================================
 %% GNOMAD.canonical | CONVERT STRING TO LOGICAL CLASS
 %==========================================================================
-clc; clearvars -except P GNOMAD CLINVAR HUMAN MOUSE
+clc; clearvars -except P PGS GNOMAD
 
 
 
-VAR = GNOMAD.canonical;
+VAR = GNOMAD.CANONICAL;
 
 gcounts( VAR )
 
 TF = VAR == "YES";
 
-GNOMAD.canonical = TF;
+GNOMAD.CANONICAL = TF;
 
 
 
@@ -382,19 +409,38 @@ GNOMAD.canonical = TF;
 %==========================================================================
 %% GNOMAD.genePheno | CONVERT STRING TO LOGICAL CLASS
 %==========================================================================
-clc; clearvars -except P GNOMAD CLINVAR HUMAN MOUSE
+clc; clearvars -except P PGS GNOMAD
 
 
 
-VAR = GNOMAD.genePheno;
+VAR = GNOMAD.GENE_PHENO;
 
 gcounts( VAR )
 
 TF = VAR == "1";
 
-GNOMAD.genePheno = TF;
+GNOMAD.GENE_PHENO = TF;
 
 
+
+
+% return
+%==========================================================================
+%% SORT GNOMAD TABLE AND FILL MISSING GENES WITH PREV
+%==========================================================================
+clc; clearvars -except P PGS GNOMAD
+
+
+
+GNOMAD.CHRPOS = makeCHRPOS(GNOMAD.CHR, GNOMAD.POS);
+
+GNOMAD = movevars(GNOMAD,'CHRPOS','Before','CHR');
+
+GNOMAD = sortrows(GNOMAD,'CHRPOS');
+
+GNOMAD.GENE = fillmissing(GNOMAD.GENE,'previous');
+
+GNOMAD.isLOF = ones(size(GNOMAD,1),1);
 
 
 
@@ -403,7 +449,7 @@ GNOMAD.genePheno = TF;
 %==========================================================================
 %% GNOMAD.genePheno | CONVERT STRING TO LOGICAL CLASS
 %==========================================================================
-clc; clearvars -except P GNOMAD CLINVAR HUMAN MOUSE
+clc; clearvars -except P PGS GNOMAD
 
 
 
@@ -432,9 +478,13 @@ GNOMAD = hint(GNOMAD, 'GENEi', 'Unique gene integer');
 %==========================================================================
 %% EXPORT DATASET
 %==========================================================================
-clc; clearvars -except P GNOMAD HUMAN MOUSE CLINVAR
+clc; clearvars -except P PGS GNOMAD
 
-save([P.mat P.f 'PGS_STEP050_OUTPUT.mat'],'GNOMAD','HUMAN','MOUSE','CLINVAR');
+DATAS = PGS.DATAS;
 
-writetable(GNOMAD,[P.csv P.f 'PGS_STEP050_OUTPUT.csv'])
+
+save([P.mat P.f 'PGS_STEP043_OUTPUT.mat'],'GNOMAD','DATAS');
+
+
+% writetable(GNOMAD,[P.csv P.f 'PGS_STEP050_OUTPUT.csv'])
 

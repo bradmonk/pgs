@@ -38,38 +38,64 @@ GNOMAD = M.GNOM;
 clearvars -except P GNOMAD
 
 
+o = detectImportOptions([P.csv '/aleks/PGS_MAIN.xlsx'],'Sheet','HUMAN_LETHAL');
+HUMAN1 = readtable([P.csv P.f '/aleks/PGS_MAIN.xlsx'],o);
+
+o = detectImportOptions([P.csv '/aleks/PGS_MAIN.xlsx'],'Sheet','LGLIST_HUMAN');
+HUMAN2 = readtable([P.csv P.f '/aleks/PGS_MAIN.xlsx'],o);
+
+o = detectImportOptions([P.csv '/aleks/PGS_MAIN.xlsx'],'Sheet','MOUSE_LETHAL_A');
+MOUSE1 = readtable([P.csv P.f '/aleks/PGS_MAIN.xlsx'],o);
+
+o = detectImportOptions([P.csv '/aleks/PGS_MAIN.xlsx'],'Sheet','MOUSE_LETHAL_B');
+MOUSE2 = readtable([P.csv P.f '/aleks/PGS_MAIN.xlsx'],o);
+
+o = detectImportOptions([P.csv '/aleks/PGS_MAIN.xlsx'],'Sheet','LGLIST_MOUSE');
+MOUSE3 = readtable([P.csv P.f '/aleks/PGS_MAIN.xlsx'],o);
+
+o = detectImportOptions([P.csv '/aleks/PGS_MAIN.xlsx'],'Sheet','CLINVAR');
+GUO = readtable([P.csv P.f '/aleks/PGS_MAIN.xlsx'],o);
 
 
-o = detectImportOptions([P.csv P.f 'LGLIST_HUMAN.csv']);
-HUMAN = readtable([P.csv P.f 'LGLIST_HUMAN.csv'],o);
+
+DATAS.HUMAN1    = HUMAN1;
+DATAS.HUMAN2    = HUMAN2;
+DATAS.MOUSE1    = MOUSE1;
+DATAS.MOUSE2    = MOUSE2;
+DATAS.MOUSE3    = MOUSE3;
+DATAS.GUO       = GUO;
 
 
-o = detectImportOptions([P.csv P.f 'LGLIST_MOUSE.csv']);
-MOUSE = readtable([P.csv P.f 'LGLIST_MOUSE.csv'],o);
-
-
-o = detectImportOptions([P.csv P.f 'ClinVarGeneList.csv']);
-CLINVAR = readtable([P.csv P.f 'ClinVarGeneList.csv'],o);
 
 
 
 %==========================================================================
 %% CLEAN HUMAN & MOUSE GENE TABLE
 %==========================================================================
-clc; clearvars -except P GNOMAD HUMAN MOUSE CLINVAR
+clc; clearvars -except P GNOMAD DATAS
 
 
 fprintf('\n\nGNOMAD Variables:\n------------------------\n')
 disp(char(string(GNOMAD.Properties.VariableNames')));
 
-fprintf('\n\nHUMAN Variables:\n------------------------\n')
-disp(char(string(HUMAN.Properties.VariableNames')));
+fprintf('\n\nHUMAN1 Variables:\n------------------------\n')
+disp(char(string(DATAS.HUMAN1.Properties.VariableNames')));
 
-fprintf('\n\nMOUSE Variables:\n------------------------\n')
-disp(char(string(MOUSE.Properties.VariableNames')));
+fprintf('\n\nHUMAN2 Variables:\n------------------------\n')
+disp(char(string(DATAS.HUMAN2.Properties.VariableNames')));
 
-fprintf('\n\nCLINVAR Variables:\n------------------------\n')
-disp(char(string(CLINVAR.Properties.VariableNames')));
+fprintf('\n\nMOUSE1 Variables:\n------------------------\n')
+disp(char(string(DATAS.MOUSE1.Properties.VariableNames')));
+
+fprintf('\n\nMOUSE2 Variables:\n------------------------\n')
+disp(char(string(DATAS.MOUSE2.Properties.VariableNames')));
+
+fprintf('\n\nMOUSE3 Variables:\n------------------------\n')
+disp(char(string(DATAS.MOUSE3.Properties.VariableNames')));
+
+fprintf('\n\nGUO Variables:\n------------------------\n')
+disp(char(string(DATAS.GUO.Properties.VariableNames')));
+
 
 
 
@@ -79,6 +105,153 @@ disp(char(string(CLINVAR.Properties.VariableNames')));
 %==========================================================================
 %% RENAME VARIABLES IN GNOMAD TABLE
 %==========================================================================
+clc; clearvars -except P GNOMAD DATAS
+
+
+GNOMAD.Properties.VariableNames{'Gene'} = 'GENE_ID';
+GNOMAD.Properties.VariableNames{'SYMBOL'} = 'GENE';
+GNOMAD.Properties.VariableNames{'start_position'} = 'POS';
+GNOMAD.Properties.VariableNames{'end_position'} = 'POS_END';
+GNOMAD.Properties.VariableNames{'reference_bases'} = 'REF';
+GNOMAD.Properties.VariableNames{'alt'} = 'ALT';
+GNOMAD.Properties.VariableNames{'variant_type'} = 'VTYPE';
+
+
+
+
+
+
+
+
+
+
+
+%==========================================================================
+%% REMOVE GENDER COUNTS FROM SUBPOPULATIONS
+%==========================================================================
+clc; clearvars -except P GNOMAD DATAS
+
+
+
+GNOMAD.AN_afr_female           = [];
+GNOMAD.AN_afr_male             = [];
+GNOMAD.AN_amr_female           = [];
+GNOMAD.AN_amr_male             = [];
+GNOMAD.AN_asj_female           = [];
+GNOMAD.AN_asj_male             = [];
+GNOMAD.AN_eas_female           = [];
+GNOMAD.AN_eas_male             = [];
+GNOMAD.AN_fin_female           = [];
+GNOMAD.AN_fin_male             = [];
+GNOMAD.AN_nfe_female           = [];
+GNOMAD.AN_nfe_male             = [];
+GNOMAD.AN_oth_female           = [];
+GNOMAD.AN_oth_male             = [];
+GNOMAD.AN_sas_female           = [];
+GNOMAD.AN_sas_male             = [];
+GNOMAD.AC_afr_female           = [];
+GNOMAD.AC_afr_male             = [];
+GNOMAD.AC_amr_female           = [];
+GNOMAD.AC_amr_male             = [];
+GNOMAD.AC_asj_female           = [];
+GNOMAD.AC_asj_male             = [];
+GNOMAD.AC_eas_female           = [];
+GNOMAD.AC_eas_male             = [];
+GNOMAD.AC_fin_female           = [];
+GNOMAD.AC_fin_male             = [];
+GNOMAD.AC_nfe_female           = [];
+GNOMAD.AC_nfe_male             = [];
+GNOMAD.AC_oth_female           = [];
+GNOMAD.AC_oth_male             = [];
+GNOMAD.AC_sas_female           = [];
+GNOMAD.AC_sas_male             = [];
+GNOMAD.AF_afr_female           = [];
+GNOMAD.AF_afr_male             = [];
+GNOMAD.AF_amr_female           = [];
+GNOMAD.AF_amr_male             = [];
+GNOMAD.AF_asj_female           = [];
+GNOMAD.AF_asj_male             = [];
+GNOMAD.AF_eas_female           = [];
+GNOMAD.AF_eas_male             = [];
+GNOMAD.AF_fin_female           = [];
+GNOMAD.AF_fin_male             = [];
+GNOMAD.AF_nfe_female           = [];
+GNOMAD.AF_nfe_male             = [];
+GNOMAD.AF_oth_female           = [];
+GNOMAD.AF_oth_male             = [];
+GNOMAD.AF_sas_female           = [];
+GNOMAD.AF_sas_male             = [];
+
+GNOMAD.nhomalt_afr_female      = [];
+GNOMAD.nhomalt_afr_male        = [];
+GNOMAD.nhomalt_amr_female      = [];
+GNOMAD.nhomalt_amr_male        = [];
+GNOMAD.nhomalt_asj_female      = [];
+GNOMAD.nhomalt_asj_male        = [];
+GNOMAD.nhomalt_eas_female      = [];
+GNOMAD.nhomalt_eas_male        = [];
+GNOMAD.nhomalt_fin_female      = [];
+GNOMAD.nhomalt_fin_male        = [];
+GNOMAD.nhomalt_nfe_female      = [];
+GNOMAD.nhomalt_nfe_male        = [];
+GNOMAD.nhomalt_oth_female      = [];
+GNOMAD.nhomalt_oth_male        = [];
+GNOMAD.nhomalt_sas_female      = [];
+GNOMAD.nhomalt_sas_male        = [];
+
+
+
+%==========================================================================
+%% REORDER VARIABLES IN GNOMAD TABLE
+%==========================================================================
+clc; clearvars -except P GNOMAD DATAS
+
+peek(GNOMAD)
+
+
+GNOMAD = movevars(GNOMAD,{'GENE'},'After','ALT');
+
+
+GNOMAD = movevars(GNOMAD,{'AN_raw','AN_popmax','AN_female','AN_male'},'Before','AN_afr');
+GNOMAD = movevars(GNOMAD,{'AC_raw','AC_popmax','AC_female','AC_male'},'Before','AC_afr');
+GNOMAD = movevars(GNOMAD,{'AF_raw','AF_popmax','AF_female','AF_male'},'Before','AF_afr');
+GNOMAD = movevars(GNOMAD,{'nhomalt_raw','nhomalt_popmax','nhomalt_female','nhomalt_male'},'Before','AF_afr');
+
+GNOMAD = movevars(GNOMAD,{'AA_MAF','AFR_MAF','AMR_MAF','EA_MAF','EAS_MAF','EUR_MAF','SAS_MAF','GMAF'},'After','nhomalt_sas');
+
+peek(GNOMAD)
+
+
+
+%==========================================================================
+%% CHANGE VARIABLE CLASS
+%==========================================================================
+clc; clearvars -except P GNOMAD DATAS
+
+
+% COLUMNS 8-117 SHOULD BE NUMERIC
+
+
+
+V = GNOMAD.Properties.VariableNames;
+
+for i = 8:117
+    
+    if ~isnumeric(GNOMAD.(V{i}))
+        GNOMAD.(V{i}) = double(GNOMAD{:,i});
+    end
+    
+end
+
+
+
+
+
+
+%==========================================================================
+%% RENAME VARIABLES IN GNOMAD TABLE
+%==========================================================================
+%{
 clc; clearvars -except P GNOMAD HUMAN MOUSE CLINVAR
 disp(char(string(GNOMAD.Properties.VariableNames')));
 
@@ -140,7 +313,7 @@ T.Properties.VariableNames{'LOF_FLAGS'}             = 'lof_flags';
 
 
 GNOMAD = T;
-
+%}
 
 
 
@@ -148,6 +321,7 @@ GNOMAD = T;
 %==========================================================================
 %% REORDER VARIABLES IN GNOMAD TABLE
 %==========================================================================
+%{
 clc; clearvars -except P GNOMAD HUMAN MOUSE CLINVAR
 disp(char(string(GNOMAD.Properties.VariableNames')));
 
@@ -253,6 +427,11 @@ T = T(:,ORDER);
 
 
 GNOMAD = T;
+%}
+
+
+
+
 
 
 
@@ -261,7 +440,7 @@ GNOMAD = T;
 %==========================================================================
 %% ADD VARIABLE DESCRIPTIONS
 %==========================================================================
-
+%{
 
 
 
@@ -365,7 +544,7 @@ GNOMAD.Properties.VariableDescriptions = VariableDescriptions;
 
 
 GNOMAD.Properties.VariableDescriptions
-
+%}
 
 
 
@@ -373,14 +552,13 @@ GNOMAD.Properties.VariableDescriptions
 %==========================================================================
 %% EXPORT DATASET
 %==========================================================================
-clc; clearvars -except P GNOMAD HUMAN MOUSE CLINVAR
-
-writetable(GNOMAD,[P.csv P.f 'PGS_STEP3_OUTPUT.csv'])
-
-save([P.mat P.f 'PGS_STEP030_OUTPUT.mat'],'GNOMAD','HUMAN','MOUSE','CLINVAR');
+clc; clearvars -except P GNOMAD DATAS
 
 
 
+save([P.mat P.f 'PGS_STEP030_OUTPUT.mat'],'GNOMAD','DATAS');
+
+% writetable(GNOMAD,[P.csv P.f 'PGS_STEP3_OUTPUT.csv'])
 
 
 

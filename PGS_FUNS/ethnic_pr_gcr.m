@@ -1,22 +1,7 @@
-function [PrGCR] = pr_gcr(TBL,varargin)
+function [PrGCR] = ethnic_pr_gcr(GCR)
+%GCR = TBL.GCR(TBL.GENEj == 1);
 
-
-if nargin == 2
-
-    nB = varargin{1};
-
-else
-
-    nB = 20;
-
-end
-
-
-
-
-GCR = TBL.GCR(TBL.GENEj == 1);
-
-%GCR = TBL.GCR(TBL.GENEj == 1).^1.1;
+nB = 20;
 
 
 nV = numel(GCR);
@@ -25,10 +10,7 @@ nV = 5000;
 end
 
 
-
 PrGCR = zeros(nV,nB);
-
-
 
 
 for i = 1:nV
@@ -40,6 +22,9 @@ for i = 1:nV
 
     end
 end
+
+
+PrGCR = nanmean(PrGCR,2);
 
 
 end

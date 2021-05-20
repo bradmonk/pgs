@@ -9,10 +9,11 @@ P.json   = [P.home filesep 'PGS_JSON'];
 P.gnomat = [P.home filesep 'PGS_GNOMAT'];
 P.mat    = [P.home filesep 'PGS_MAT'];
 P.csv    = [P.home filesep 'PGS_CSV'];
-P.funs   = [P.home filesep 'PGS_FUNS'];
+P.fun    = [P.home filesep 'PGS_FUNS'];
 addpath(join(string(struct2cell(P)),pathsep,1))
 cd(P.home); P.f = filesep;
 %------------------------------------------------
+
 
 
 
@@ -24,30 +25,17 @@ cd(P.home); P.f = filesep;
 clc; clearvars -except P
 
 
-PGS = load([P.mat P.f 'PGS_STEP056_OUTPUT.mat']);
+PGS = load([P.mat P.f 'PGS_STEP090_OUTPUT.mat']);
 
 GNOMAD  = PGS.GNOMAD;
 
 
 
 
-% GNOMAD DATASET COLUMN REFERENCE
-%------------------------------------------------------------
-% GNOMAD COLUMNS    T.GENEi            -    T.isSV
-% PLI    COLUMNS    T.pLI              -    T.oe_lof
-% DAWES  COLUMNS    T.hgnc_id          -    T.isdawes
-% MK1    COLUMNS    T.MKO1_TARGETS     -    T.placenta
-% MK2    COLUMNS    T.HOMOLO_GENE_ID   -    T.MKO2_TARGETS
-% SCR    COLUMNS    T.INVITAE          -    T.MYRIAD
-% TARG   COLUMNS    T.HAS_OMIM         -    T.MOUSE2_TARGETS
-%------------------------------------------------------------
 
 
-
-
-
-
-
+peek(GNOMAD);
+gene_report(GNOMAD)
 %==========================================================================
 %% IMPORT OMIM DATA
 %==========================================================================
@@ -96,13 +84,32 @@ TBL = readtable(P.mim,OPT);
 [ai,bi] = ismember(GNOMAD.GENE,TBL.GeneSym);
 
 
-GNOMAD.MIMNumber = nan(height(GNOMAD),1);
-GNOMAD.MIMNumber(ai) = TBL.MIMNumber(bi(ai),:);
+GNOMAD.OMIM     = nan(height(GNOMAD),1);
+GNOMAD.OMIM(ai) = TBL.MIMNumber(bi(ai),:);
 
 
-sum(~isnan(GNOMAD.MIMNumber)) / height(GNOMAD)
 
-sum(GNOMAD.HAS_OMIM) / height(GNOMAD)
+
+
+
+%==========================================================================
+%% REPORT STATS ON   OMIM - GNOMAD - DAWES   MATCHES
+%==========================================================================
+clc; clearvars -except P PGS GNOMAD
+
+
+
+NUM = sum(~isnan(GNOMAD.OMIM));
+PCT = NUM / height(GNOMAD)*100;
+fprintf('OMIM ENTRIES MATCHING GNOMAD SNVs:   %7.0f   (%2.1f %%) \n',NUM,PCT)
+
+
+NUM = sum(~isnan(GNOMAD.DAW_mim));
+PCT = NUM / height(GNOMAD)*100;
+fprintf('OMIM ENTRIES MATCHING DAWES OMIMS:   %7.0f   (%2.1f %%) \n',NUM,PCT)
+
+
+
 
 
 
@@ -180,9 +187,9 @@ GNOMAD.CLINVAR_LIKELY_BENIGN(ai)        = TBL.likely_benign(bi(ai),:);
 GNOMAD.CLINVAR_BENIGN(ai)               = TBL.benign(bi(ai),:);
 
 
-sum(~isnan(GNOMAD.CLINVAR_PATHOGENIC)) / height(GNOMAD)
-
-
+NUM = sum(~isnan(GNOMAD.CLINVAR_PATHOGENIC));
+PCT = NUM / height(GNOMAD)*100;
+fprintf('PATHOGENIC CLINVAR SVNs:   %10.0f   (%2.1f %%) \n',NUM,PCT)
 
 
 
@@ -237,7 +244,14 @@ GNOMAD.CADD_RAW(ai)     = CADD.RawScore(bi(ai),:);
 GNOMAD.CADD_PHRED(ai)	= CADD.PHRED(bi(ai),:);
 
 
-sum(~isnan(GNOMAD.CADD_RAW)) / height(GNOMAD)
+
+
+
+NUM = sum(~isnan(GNOMAD.CADD_RAW));
+PCT = NUM / height(GNOMAD)*100;
+fprintf('SVNs WITH CADD ENTRY:   %10.0f   (%2.1f %%) \n',NUM,PCT)
+
+
 
 
 
@@ -248,12 +262,11 @@ sum(~isnan(GNOMAD.CADD_RAW)) / height(GNOMAD)
 clc; clearvars -except P PGS GNOMAD
 
 
-GAD = PGS.GNOMAD;
+DATAS = PGS.DATAS;
+DAWES = PGS.DAWES;
 
-TABLES = PGS.TABLES;
 
-save([P.mat P.f 'PGS_STEP058_OUTPUT.mat'],'GNOMAD','TABLES','GAD');
+save([P.mat P.f 'PGS_STEP100_OUTPUT.mat'],'GNOMAD','DATAS','DAWES');
 
-% writetable(GNOMAD,[P.csv P.f 'PGS_STEP056_OUTPUT.csv'])
 
 

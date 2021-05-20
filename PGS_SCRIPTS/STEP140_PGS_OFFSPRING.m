@@ -48,13 +48,47 @@ pLoF Intolerance (pLI)
 Constraint = high pLI
 
 
-%}
 
+
+
+
+
+
+
+To further refine our analysis, search the variants described in Clinvar of
+our genes with an OMIM id. Are you supposed to find out the stats for each
+variant instead of the gene as a whole? I am unsure 
+
+
+CADD score: "The Combined Annotation Dependent Depletion (CADD) tool scores
+the predicted deleteriousness of single nucleotide variants and
+insertion/deletions variants in the human genome by integrating multiple
+annotations including conservation and functional information into one
+metric."
+https://uswest.ensembl.org/info/genome/variation/prediction/protein_function.html
+Should we look into the genes without omim annotation or for all of them?
+
+
+Find out the probability of carrying a mutation in more than one gene and
+of finding a partner with a mutation in any of those same genes 
+
+
+We are doing our probability studies based on the OMIM database. In order
+to prove that our prediction is right, we could look for those genes in the
+families/trios we have sequenced and see if we see mutations in those
+candidate genes and in which frequency. I just shared these files with you.
+I am trying to figure out what exactly those files are
+
+
+Use the CNV database to pull out the deletions found in our 784 genes (I
+think that this is in addition to assess LoF mutations since according to
+Svetlana this is the most common mutation)
+
+
+%}
 
 % WHAT IS THE PROBABILITY OF SOMEONE WITH MULTIPLE VARIANTS
 % CADD SCORE
-
-
 % INTERESTING IDEA FOR ULTIMATELY 
 % COPY NUMBER VARIANT DATABASE
 
@@ -64,18 +98,21 @@ Constraint = high pLI
 %==========================================================================
 clc; clearvars -except P
 
+
+
 PGS = load([P.mat P.f 'PGS_STEP058_OUTPUT.mat']);
 
 
-
-GNOMAD  = PGS.GNOMAD;   % GNOMAD DATASET
-
-
-
-peek(GNOMAD)
+GNOMAD  = PGS.GNOMAD; peek(GNOMAD)
 
 
 
+
+
+%==========================================================================
+%% EXAMINE GNOMAD DATASET
+%==========================================================================
+% 
 % GNOMAD DATASET COLUMN REFERENCE
 %----------------------------------------------------------------
 % GNOMAD COLUMNS    T.GENEi               -    T.isSV
@@ -83,12 +120,26 @@ peek(GNOMAD)
 % DAWES  COLUMNS    T.hgnc_id             -    T.isdawes
 % MK1    COLUMNS    T.MKO1_TARGETS        -    T.placenta
 % MK2    COLUMNS    T.HOMOLO_GENE_ID      -    T.MKO2_TARGETS
-% SCR    COLUMNS    T.INVITAE             -    T.MYRIAD
+% SCR    COLUMNS    T.PANEL               -    T.PANEL_TF
 % TARG   COLUMNS    T.HAS_OMIM            -    T.MOUSE2_TARGETS
 % OMIM   COLUMNS    T.MIMNumber           -    T.MIMNumber
 % CLIN   COLUMNS    T.CLINVAR_PATHOGENIC  -    T.CLINVAR_BENIGN
-% CADD   COLUMNS    T.CADD_RAW            -    T.CADD_PHRED
+% CADD   COLUMNS    T.CADD_RAW            -    T.CADD_PHRED 
+% (297 COLUMNS)
 %----------------------------------------------------------------
+clc; clearvars -except P PGS GNOMAD
+
+
+
+
+
+sum(GNOMAD.PANEL_TF) / height(GNOMAD)
+sum(GNOMAD.HAS_OMIM) / height(GNOMAD)
+sum(~isnan(GNOMAD.MIMNumber)) / height(GNOMAD)
+sum(~isnan(GNOMAD.CLINVAR_PATHOGENIC)) / height(GNOMAD)
+sum(~isnan(GNOMAD.CADD_RAW)) / height(GNOMAD)
+
+
 
 
 
@@ -102,15 +153,7 @@ peek(GNOMAD)
 clc; clearvars -except P PGS GNOMAD
 
 
-
-
-
-
-
-x = GNOMAD.INVITAE == 1;
-y = GNOMAD.INVITAX == 1;
-z = GNOMAD.MYRIAD == 1;
-p = (x | y | z);                   % SCREEN PANEL   TARGETS (PAN) (P)
+p = GNOMAD.PANEL_TF == 1;          % SCREEN PANEL   TARGETS (PAN) (P)
 d = GNOMAD.DAWES_TARGETS == 1;     % DAWES NON-OMIM TARGETS (DAW) (D)
 h = GNOMAD.HUMAN_TARGETS == 1;     % DAWES HUMAN    TARGETS (HUM) (H)
 m = GNOMAD.MOUSE1_TARGETS == 1;    % MOUSE LIST-1   TARGETS (MK1) (M)
@@ -210,6 +253,57 @@ GSET.HMK.Properties.VariableDescriptions{'GENE'}    = 'HMK';
 
 
 
+
+
+
+
+
+%==========================================================================
+%% DETERMINE WHICH PANEL GENES ARE LETHAL
+%==========================================================================
+% 
+% GNOMAD DATASET COLUMN REFERENCE
+%----------------------------------------------------------------
+% GNOMAD COLUMNS    T.GENEi               -    T.isSV
+% PLI    COLUMNS    T.pLI                 -    T.oe_lof
+% DAWES  COLUMNS    T.hgnc_id             -    T.isdawes
+% MK1    COLUMNS    T.MKO1_TARGETS        -    T.placenta
+% MK2    COLUMNS    T.HOMOLO_GENE_ID      -    T.MKO2_TARGETS
+% SCR    COLUMNS    T.PANEL               -    T.PANEL_TF
+% TARG   COLUMNS    T.HAS_OMIM            -    T.MOUSE2_TARGETS
+% OMIM   COLUMNS    T.MIMNumber           -    T.MIMNumber
+% CLIN   COLUMNS    T.CLINVAR_PATHOGENIC  -    T.CLINVAR_BENIGN
+% CADD   COLUMNS    T.CADD_RAW            -    T.CADD_PHRED 
+% (297 COLUMNS)
+%----------------------------------------------------------------
+% 
+% TBL = GSET.GNO;
+% TBL = GSET.PAN; 
+% TBL = GSET.nPAN;
+% TBL = GSET.DnP; 
+% TBL = GSET.DMKnP;
+% TBL = GSET.HnP; 
+% TBL = GSET.HMKnP;
+% TBL = GSET.HMK;
+%---
+% TBL = GSET.PAN;
+% TBL = GSET.HMKnP;
+% TBL = GSET.HMK;
+%----------------------------------------------------------------
+clc; clearvars -except P PGS GNOMAD GSET
+
+
+TBL1 = GSET.PAN; 
+
+TBL2 = TBL1(TBL1.GENEj ,:);
+
+
+writetable(TBL1,'/Users/bradleymonk/Desktop/TBL1.csv')
+writetable(TBL2,'/Users/bradleymonk/Desktop/TBL2.csv')
+
+
+
+
 %==========================================================================
 %% QUANTIFY CARRIER RATES
 %==========================================================================
@@ -236,8 +330,12 @@ clc; clearvars -except P PGS GNOMAD GSET
 % TBL = GSET.HK; 
 % TBL = GSET.HnP; 
 % TBL = GSET.HMKnP;
-TBL = GSET.HMK;
+% TBL = GSET.HMK;
 
+
+% TBL = GSET.PAN;
+% TBL = GSET.HMKnP;
+TBL = GSET.HMK;
 
 
 
@@ -248,6 +346,11 @@ PrVCR  = nanmean(pr_vcr(TBL),2);
 PrJVCR = nanmean(pr_jvcr(TBL),2);
 PrGCR  = nanmean(pr_gcr(TBL),2);
 PrJGCR = nanmean(pr_jgcr(TBL),2);
+
+
+% PctJGCR = PrJGCR .* 100
+% x = (1:numel(PrJGCR))';
+
 
 
 close all;
@@ -267,10 +370,144 @@ fprintf('max PrJGCR: %9.4f \n' , max(PrJGCR) )
 
 
 
+
+
+
+
+
+
+
+
+%==========================================================================
+%% QUANTIFY CARRIER RATES FOR GENES WITH OMIM NUMBER
+%==========================================================================
+clc; clearvars -except P PGS GNOMAD GSET
+
+
+% TBL = GSET.PAN;
+% TBL = GSET.HMKnP;
+TBL = GSET.HMK;
+
+
+
+i = isnan(TBL.MIMNumber);
+
+TBL(i,:) = [];
+
+
+
+
+
+
+TBL    = GENEijk(TBL); 
+TBL    = vcr(TBL); 
+TBL    = gcr(TBL);
+PrVCR  = nanmean(pr_vcr(TBL),2);
+PrJVCR = nanmean(pr_jvcr(TBL),2);
+PrGCR  = nanmean(pr_gcr(TBL),2);
+PrJGCR = nanmean(pr_jgcr(TBL),2);
+
+PctJGCR = PrJGCR .* 100
+x = (1:numel(PrJGCR))';
+
+
+
+close all;
+plot4pack( PrVCR, PrJVCR, PrGCR, PrJGCR )
+
+clc;
+fprintf('SITES:	%9.0f \n' , height(TBL))
+fprintf('GENES: %9.0f \n' , numel(unique(TBL.GENE)))
+disp(' ');
+fprintf('max PrVCR:  %9.4f \n' , max(PrVCR) )
+fprintf('max PrJVCR: %9.4f \n' , max(PrJVCR) )
+fprintf('max PrGCR:  %9.4f \n' , max(PrGCR) )
+fprintf('max PrJGCR: %9.4f \n' , max(PrJGCR) )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%==========================================================================
+%% SIMULATE OFFSPRING CARRIER RATES
+%==========================================================================
+clc; clearvars -except P PGS GNOMAD GSET
+
+
+
+% TBL = GSET.PAN;
+% TBL = GSET.HMKnP;
+TBL = GSET.HMK;
+
+
+
+TBL    = GENEijk(TBL); 
+TBL    = vcr(TBL); 
+TBL    = gcr(TBL);
+PrVCR  = nanmean(pr_vcr(TBL),2);
+PrJVCR = nanmean(pr_jvcr(TBL),2);
+PrGCR  = nanmean(pr_gcr(TBL),2);
+PrJGCR = nanmean(pr_jgcr(TBL),2);
+
+close all;
+plot4pack( PrVCR, PrJVCR, PrGCR, PrJGCR )
+
+
+
+PrVCR = 1 - prod(1 - TBL.VCR);
+
+PrJVCR = 1 - prod(1 - TBL.VCR.^2);
+
+GCR = TBL.GCR(TBL.GENEj == 1).^2;
+PrJGCR = 1 - prod(1 - GCR);
+
+
+p1 = PrJGCR
+p2 = PrJGCR * PrJGCR
+p3 = PrJGCR * PrJGCR * PrJGCR
+p4 = PrJGCR * PrJGCR * PrJGCR * PrJGCR
+p5 = PrJGCR * PrJGCR * PrJGCR * PrJGCR * PrJGCR
+
+ppct = [p1 p2 p3 p4 p5]' .* 100
+plog = -log([p1 p2 p3 p4 p5]')
+
+
+c1 = 1 - (.75)
+c2 = 1 - (.75 * .75)
+c3 = 1 - (.75 * .75 * .75)
+c4 = 1 - (.75 * .75 * .75 * .75)
+c5 = 1 - (.75 * .75 * .75 * .75 * .75)
+
+cpct = [c1 c2 c3 c4 c5]' .* 100
+clog = -log([c1 c2 c3 c4 c5]')
+
+
 %==========================================================================
 %% RUN CARRIER RATES BASED ON pLI
 %==========================================================================
-clc; clearvars -except P PGS GNOMAD GAD DAW MK1 MK2 GUO GSET
+clc; clearvars -except P PGS GNOMAD GSET
 %--------------------------------------------------------------------------
 % Probability of loss of function intolerance (pLI), for predicted 
 % loss-of-function (pLoF) variation. The higher the pLI, the higher the 

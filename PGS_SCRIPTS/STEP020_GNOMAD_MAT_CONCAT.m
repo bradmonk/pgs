@@ -7,6 +7,7 @@ cd(P.home);
 P.srip   = [P.home filesep 'PGS_SCRIPTS'];
 P.json   = [P.home filesep 'PGS_JSON'];
 P.gnomat = [P.home filesep 'PGS_GNOMAT'];
+P.mat    = [P.home filesep 'PGS_MAT'];
 P.funs   = [P.home filesep 'PGS_FUNS'];
 addpath(join(string(struct2cell(P)),pathsep,1))
 cd(P.home); P.f = filesep;
